@@ -57,7 +57,5 @@
     # React to NetworkManager events (low-level API)
     # Used to turn on proxies in response to certain VPNs lifecycles.
     ./networkmanager-events.nix
-    # For upstream https://github.com/NixOS/nixpkgs/pull/551055
-    ./chromium
   ];
 }
