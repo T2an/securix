@@ -51,7 +51,7 @@ jobs:
         sudo chmod +x "$HOOK_PATH"
         echo "Patched post-build-hook successfully."
     - name: Build tests
-      run: nix-build -A tests
+      run: nix-build -A tests.tools
 name: '[Sécurix] Test suite'
 on:
   pull_request:
