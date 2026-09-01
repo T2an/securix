@@ -1,11 +1,11 @@
-# SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+# SPDX-FileCopyrightText: 2026 Titouan Heyrendt <t.heyrendt@gmail.com>
 #
 # SPDX-License-Identifier: MIT
 
 { pkgs, libSecurix }:
 let
   terminal = libSecurix.mkTerminal {
-    name = "portail";
+    name = "g3proxy";
     userSpecificModule = { };
     vpnProfiles = { };
     modules = [
@@ -25,16 +25,8 @@ let
 
         securix.automatic-http-proxy = {
           enable = true;
-          implementation = "portail";
+          implementation = "g3proxy";
           proxies = {
-            dyntest = {
-              definition = "dynamic";
-              remotePath = pkgs.writeText "secret" ''
-                ADDRESS=1.2.3.4
-                PORT=8080
-              '';
-            };
-
             withssh = {
               vpn = "vpn-a";
               definition = "static";
@@ -74,22 +66,17 @@ let
   };
 in
 pkgs.testers.nixosTest {
-  name = "portail";
+  name = "g3proxy";
   nodes = {
     securix-unbranded-0 = {
       imports = terminal.modules;
     };
   };
   testScript = ''
-    import json
-
     securix = securix_unbranded_0
     securix.wait_for_unit("default.target")
     securix.succeed("cat /etc/os-release | grep securix")
-    securix.wait_for_unit("portail.service")
-    securix.succeed("systemctl restart portail.service")
-    securix.wait_for_unit("portail.service")
-    assert json.loads(securix.succeed("portail rpc --json list-backends"))[0]['spec'] is not None, "Specification did not get reloaded"
+    securix.wait_for_unit("g3proxy.service")
 
     dispatcher = securix.succeed(
       "grep -rl securix-nm-events-hook /etc/NetworkManager/dispatcher.d/"
