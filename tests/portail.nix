@@ -89,7 +89,18 @@ pkgs.testers.nixosTest {
     securix.wait_for_unit("portail.service")
     securix.succeed("systemctl restart portail.service")
     securix.wait_for_unit("portail.service")
-    assert json.loads(securix.succeed("portail rpc --json list-backends"))[0]['spec'] is not None, "Specification did not get reloaded"
+
+    # Retries: portail-dynamic-updates.service races portail.service becoming active.
+    # Looked up by id, not by list position: list-backends does not guarantee an order.
+    def dyntest_spec_is_set(_):
+        backends = json.loads(securix.succeed("portail rpc --json list-backends"))
+        dyntest = next(b for b in backends if b["id"] == "dyntest")
+        return dyntest["spec"] is not None
+
+    try:
+        retry(dyntest_spec_is_set, timeout_seconds=10)
+    except Exception as e:
+        raise AssertionError(f"Specification did not get reloaded: {e}")
 
     dispatcher = securix.succeed(
       "grep -rl securix-nm-events-hook /etc/NetworkManager/dispatcher.d/"
