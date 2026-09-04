@@ -468,21 +468,9 @@ rec {
           (
             { config, ... }:
             {
-              # Ready-to-serve iPXE script chaining straight into this installer's
-              # own kernel/initrd, mirroring what `buildUSBInstallerISO` does for USB
-              # (build the system, then hand back a concrete, servable artifact)
-              # instead of leaving every caller to hand-roll their own boot script.
-              #
-              # Unlike nixpkgs' own `nixos/modules/installer/netboot/netboot.nix`
-              # (which this is modeled on), we don't bundle a squashfs Nix store into
-              # the initrd via `system.build.netbootRamdisk`: this installer is meant
-              # to stay small and fetch the real target system's closure live from a
-              # binary cache at boot time (see snowboot's
-              # fetch-system-from-binary-cache module), so we serve the plain initrd
-              # as-is rather than a squashfs-augmented one.
-              # ${cmdline} lets a caller append extra kernel params when chaining
-              # to this script from another iPXE menu (e.g. to select this
-              # install target among several).
+              # Modeled on nixpkgs' installer/netboot/netboot.nix, minus the
+              # squashfs store bundling (this installer fetches its target
+              # system live instead, see snowboot).
               system.build.netbootIpxeScript = pkgs.writeTextDir "netboot.ipxe" ''
                 #!ipxe
                 kernel ${config.boot.kernelPackages.kernel.target} init=${config.system.build.toplevel}/init initrd=initrd ${toString config.boot.kernelParams} ''${cmdline}
