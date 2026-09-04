@@ -480,11 +480,11 @@ rec {
               # binary cache at boot time (see snowboot's
               # fetch-system-from-binary-cache module), so we serve the plain initrd
               # as-is rather than a squashfs-augmented one.
+              # ${cmdline} lets a caller append extra kernel params when chaining
+              # to this script from another iPXE menu (e.g. to select this
+              # install target among several).
               system.build.netbootIpxeScript = pkgs.writeTextDir "netboot.ipxe" ''
                 #!ipxe
-                # ''${cmdline} lets a caller append extra kernel params when chaining
-                # to this script from another iPXE menu (e.g. to select this install
-                # target among several).
                 kernel ${config.boot.kernelPackages.kernel.target} init=${config.system.build.toplevel}/init initrd=initrd ${toString config.boot.kernelParams} ''${cmdline}
                 initrd initrd
                 boot
