@@ -256,11 +256,6 @@ rec {
           }:
           {
             networking.hostName = lib.mkDefault "generic-installer";
-            # `securix.self.edition` has no default (since 3908e4a) and
-            # networking.hostName's own default now derives from it, so
-            # installer builds break at eval time unless we set it, same as
-            # `mkTerminal` already does for normal terminals.
-            securix.self.edition = edition;
             # Reset the original message.
             services.getty.helpLine = lib.mkForce ''
               This is the Securix live offline installer image edition ${edition}.
